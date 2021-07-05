@@ -1,21 +1,15 @@
-fname=`blocked_domains.acl`
 terminal=`tty`
 
-exec < $fname
-
-declare -i count=1
-declare -i index=1
 declare -i requiredStatus=200
 
-while read line
+for line in $(cat file.acl);
 do
-    newLine="${line:1: -1}"
+    newLine="${line#.}"
     status=$(curl -s --head -w %{http_code} http://$newLine)
-    echo "$status"
 
-    if [ $status -ne 200 ]
+    if [ $status != $requiredStatus ]
     then
-        grep -v "$newLine" $fname > tmpfile && mv tmpfile "$fname"
+        grep -v "$newLine" blocked_domains.acl > tmpfile && mv tmpfile blocked_domains.acl
     fi
 done
 
